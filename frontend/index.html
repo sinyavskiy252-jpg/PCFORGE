@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>PCFORGE — Конфигуратор ПК</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#08080a;color:#fff;font-family:Arial,Helvetica,sans-serif}
+button,input,select{font:inherit}button{cursor:pointer}
+header{height:74px;background:#111114;border-bottom:2px solid #d71920;display:flex;align-items:center;padding:0 42px;gap:35px;position:sticky;top:0;z-index:10}
+.logo{font-size:27px;font-weight:800;letter-spacing:1px;margin-right:auto}.nav button{background:none;border:0;color:#fff;padding:10px 14px}.nav button:hover{color:#ff3b42}
+.screen{display:none;max-width:1320px;margin:auto;padding:42px 30px 70px}.screen.active{display:block}
+h1{font-size:36px;margin:0 0 10px}h2{margin-top:0}.sub{color:#fff;opacity:.75;margin-bottom:30px}
+.grid{display:grid;gap:22px}.grid3{grid-template-columns:repeat(3,1fr)}.grid4{grid-template-columns:repeat(4,1fr)}
+.card,.panel{background:linear-gradient(135deg,#29292f,#111114 55%,#24242a);border:1px solid #46464e;border-radius:14px;box-shadow:0 12px 30px #0008;padding:24px}
+.card h3{margin:0 0 10px}.price{font-size:23px;font-weight:800;margin:18px 0}.muted{opacity:.72}
+.red{background:#d71920;color:#fff;border:0;border-radius:8px;padding:13px 18px;font-weight:700}.darkbtn{background:#29292f;color:#fff;border:1px solid #555;border-radius:8px;padding:13px 18px;font-weight:700}
+.hero{padding:45px;border-radius:16px;background:linear-gradient(135deg,#19191d,#09090b);border:1px solid #444;margin-bottom:30px}.hero h1{font-size:48px}.hero p{max-width:700px;line-height:1.6}
+.filters{display:flex;gap:15px;margin-bottom:25px}.filters input,.filters select,.field input{background:#0c0c0f;color:#fff;border:1px solid #444;border-radius:8px;padding:13px;width:100%}
+.config{display:grid;grid-template-columns:1.8fr 1fr;gap:28px}.part{display:flex;align-items:center;gap:15px;background:#17171b;border:1px solid #444;border-radius:9px;padding:13px 16px;margin-bottom:10px}.part-name{font-weight:700;width:230px}.part-value{flex:1;opacity:.8}
+.summary{position:sticky;top:100px;height:max-content}.total{font-size:40px;font-weight:800;margin:22px 0}
+.auth{max-width:600px;margin:30px auto}.field{margin:18px 0}.field label{display:block;margin-bottom:8px}.field input{padding:15px}
+.table{width:100%;border-collapse:collapse}.table td,.table th{padding:16px;border-bottom:1px solid #444;text-align:left}.status{padding:6px 10px;border-radius:20px;background:#25252a}
+.modal{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;z-index:30;padding:25px}.modal.show{display:flex}.modalbox{width:min(900px,95vw);max-height:85vh;overflow:auto;background:#151519;border:1px solid #555;border-radius:15px;padding:25px}.component{display:grid;grid-template-columns:1fr auto auto;gap:18px;align-items:center;background:#202025;border:1px solid #3e3e46;border-radius:10px;padding:17px;margin:10px 0}
+.toast{position:fixed;right:25px;bottom:25px;background:#d71920;color:#fff;padding:15px 20px;border-radius:8px;display:none;z-index:50}
+.profile-head{display:flex;align-items:center;gap:25px}.avatar{width:90px;height:90px;border-radius:50%;background:#29292f;border:3px solid #d71920;display:grid;place-items:center;font-size:32px;font-weight:bold}
+@media(max-width:900px){.grid3,.grid4,.config{grid-template-columns:1fr}.summary{position:static}.nav{display:none}.part-name{width:150px}.component{grid-template-columns:1fr}.hero h1{font-size:36px}}
+</style>
+</head>
+<body>
+<header>
+<div class="logo">PCFORGE</div>
+<div class="nav">
+<button onclick="show('home')">Главная</button>
+<button onclick="show('catalog')">Каталог</button>
+<button onclick="show('config')">Конфигуратор</button>
+<button onclick="show('profile')">Профиль</button>
+</div>
+</header>
+
+<section id="home" class="screen active">
+<div class="hero"><h1>СОБЕРИ СВОЙ ПК</h1><p>Выбирай комплектующие, проверяй совместимость и рассчитывай стоимость своей сборки.</p><button class="red" onclick="show('config')">Открыть конфигуратор</button></div>
+<h2>Готовые сборки</h2>
+<div class="grid grid3">
+<div class="card"><h3>GAMER</h3><p class="muted">Ryzen 7 • RTX • 32 GB</p><div class="price">129 990 ₽</div><button class="red" onclick="loadPreset()">Использовать</button></div>
+<div class="card"><h3>PRO</h3><p class="muted">Core i7 • RTX • 32 GB</p><div class="price">179 990 ₽</div><button class="red" onclick="loadPreset()">Использовать</button></div>
+<div class="card"><h3>ULTRA</h3><p class="muted">Core i9 • RTX • 64 GB</p><div class="price">299 990 ₽</div><button class="red" onclick="loadPreset()">Использовать</button></div>
+</div>
+</section>
+
+<section id="login" class="screen"><div class="auth panel"><h1>Вход</h1><div class="field"><label>Email</label><input placeholder="example@mail.ru"></div><div class="field"><label>Пароль</label><input type="password" placeholder="••••••••"></div><button class="red" style="width:100%" onclick="show('profile')">Войти</button><p class="sub" style="margin-top:20px">Нет аккаунта? <a href="#" onclick="show('register');return false" style="color:#fff">Зарегистрироваться</a></p></div></section>
+
+<section id="register" class="screen"><div class="auth panel"><h1>Регистрация</h1><div class="field"><label>Имя пользователя</label><input placeholder="Пользователь"></div><div class="field"><label>Email</label><input placeholder="example@mail.ru"></div><div class="field"><label>Пароль</label><input type="password"></div><div class="field"><label>Подтверждение пароля</label><input type="password"></div><button class="red" style="width:100%" onclick="show('profile')">Создать аккаунт</button></div></section>
+
+<section id="catalog" class="screen"><h1>Каталог комплектующих</h1><p class="sub">Компоненты с характеристиками и ценами</p><div class="filters"><input id="search" placeholder="Поиск комплектующих..." oninput="filterCatalog()"><select><option>Все категории</option><option>Процессоры</option><option>Видеокарты</option><option>Материнские платы</option></select></div><div id="catalogGrid" class="grid grid3"></div></section>
+
+<section id="config" class="screen"><h1>Конфигуратор</h1><p class="sub">Выбирайте компоненты слева — итоговая стоимость отображается справа.</p><div class="config"><div id="parts"></div><div class="panel summary"><h2>Ваша сборка</h2><p>Совместимость: <b id="compat">✓ Проверено</b></p><hr><p>Итоговая стоимость</p><div class="total" id="total">0 ₽</div><button class="red" style="width:100%;margin-bottom:12px" onclick="checkCompatibility()">Проверить совместимость</button><button class="darkbtn" style="width:100%" onclick="saveBuild()">Сохранить сборку</button></div></div></section>
+
+<section id="compatibility" class="screen"><h1>Проверка совместимости</h1><p class="sub">Проверяем основные ограничения выбранной сборки.</p><div class="panel"><table class="table"><tr><th>Проверка</th><th>Результат</th></tr><tr><td>Процессор ↔ Материнская плата</td><td>✓ Совместимо</td></tr><tr><td>ОЗУ ↔ Материнская плата</td><td>✓ Совместимо</td></tr><tr><td>Видеокарта ↔ Корпус</td><td>✓ Совместимо</td></tr><tr><td>Блок питания</td><td>✓ Мощность достаточна</td></tr></table><button class="red" style="margin-top:25px" onclick="show('checkout')">Продолжить</button></div></section>
+
+<section id="checkout" class="screen"><h1>Оформление заказа</h1><p class="sub">Проверьте состав сборки перед оплатой.</p><div class="config"><div class="panel" id="orderList"></div><div class="panel"><h2>Итого</h2><div class="total" id="checkoutTotal">0 ₽</div><button class="red" style="width:100%" onclick="show('payment')">Перейти к оплате</button></div></div></section>
+
+<section id="payment" class="screen"><h1>Оплата</h1><p class="sub">Демонстрационный макет платёжной страницы.</p><div class="config"><div class="panel"><h2>Данные карты</h2><div class="field"><label>Номер карты</label><input placeholder="0000 0000 0000 0000"></div><div class="grid" style="grid-template-columns:1fr 1fr"><div class="field"><label>Срок действия</label><input placeholder="MM/YY"></div><div class="field"><label>CVV</label><input placeholder="•••"></div></div><div class="field"><label>Имя владельца</label><input placeholder="IVAN IVANOV"></div><button class="red" style="width:100%" onclick="pay()">Оплатить <span id="payAmount">0 ₽</span></button></div><div class="panel"><h2>Защищённый платёж</h2><p class="sub">Ваши данные используются только для демонстрации процесса оплаты.</p></div></div></section>
+
+<section id="success" class="screen"><div class="auth panel" style="text-align:center"><div style="font-size:70px">✓</div><h1>Оплата успешна</h1><p class="sub">Заказ № PF-2026-1042</p><div class="price" id="successAmount">0 ₽</div><button class="red" onclick="show('orders')">Перейти к заказам</button></div></section>
+
+<section id="profile" class="screen"><h1>Профиль</h1><div class="panel profile-head"><div class="avatar">П</div><div><h2>Пользователь</h2><p class="sub">Аккаунт PCFORGE</p></div></div><div class="grid grid4" style="margin-top:25px"><div class="card"><h3>Мои сборки</h3><p>4 сборки</p><button class="red" onclick="show('builds')">Открыть</button></div><div class="card"><h3>Избранное</h3><p>7 позиций</p><button class="red" onclick="show('favorites')">Открыть</button></div><div class="card"><h3>Мои заказы</h3><p>3 заказа</p><button class="red" onclick="show('orders')">Открыть</button></div><div class="card"><h3>Настройки</h3><p>Аккаунт</p><button class="darkbtn" onclick="toast('Раздел настроек')">Открыть</button></div></div></section>
+
+<section id="builds" class="screen"><h1>Мои сборки</h1><div class="grid"><div class="card"><h3>GAMER</h3><p>Ryzen 7 • RTX 4070 SUPER • 32 GB</p><div class="price">129 990 ₽</div><button class="red" onclick="loadPreset()">Изменить</button></div><div class="card"><h3>PRO</h3><p>Core i7 • RTX 4080 • 32 GB</p><div class="price">219 990 ₽</div><button class="red">Изменить</button></div><div class="card"><h3>WORK</h3><p>Core i5 • RTX 4060 • 16 GB</p><div class="price">89 990 ₽</div><button class="red">Изменить</button></div></div></section>
+
+<section id="favorites" class="screen"><h1>Избранное</h1><div class="grid grid3"><div class="card"><h3>RTX 4070 SUPER</h3><p>12 GB GDDR6X</p><div class="price">79 990 ₽</div></div><div class="card"><h3>Ryzen 7 7800X3D</h3><p>8 ядер • 16 потоков</p><div class="price">39 990 ₽</div></div><div class="card"><h3>Samsung 990 EVO</h3><p>1 TB NVMe</p><div class="price">8 990 ₽</div></div></div></section>
+
+<section id="orders" class="screen"><h1>Мои заказы</h1><div class="panel"><table class="table"><tr><th>Заказ</th><th>Дата</th><th>Сумма</th><th>Статус</th></tr><tr><td>PF-2026-1042</td><td>17.09.2026</td><td id="orderAmount">153 940 ₽</td><td><span class="status">Оплачен</span></td></tr><tr><td>PF-2026-0981</td><td>10.09.2026</td><td>89 990 ₽</td><td><span class="status">Доставлен</span></td></tr></table></div></section>
+
+<div id="modal" class="modal"><div class="modalbox"><div style="display:flex;justify-content:space-between;align-items:center"><h2 id="modalTitle">Выбор</h2><button class="darkbtn" onclick="closeModal()">Закрыть</button></div><div class="filters"><input id="modalSearch" placeholder="Поиск..." oninput="renderModal()"></div><div id="componentList"></div></div></div>
+<div id="toast" class="toast"></div>
+
+<script>
+
+const data={};
+let selected={}, currentType="";
+const types=["Процессор","Видеокарта","Материнская плата","Оперативная память","SSD","Блок питания","Охлаждение","Корпус"];
+let componentCache=[];
+
+function show(id){
+ document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
+ const el=document.getElementById(id); if(el) el.classList.add("active");
+ if(id==="catalog") renderCatalog();
+ if(id==="checkout") renderOrder();
+ if(id==="payment") document.getElementById("payAmount").textContent=money(total());
+ window.scrollTo(0,0);
+}
+function money(n){return Number(n||0).toLocaleString("ru-RU")+" ₽"}
+async function api(url, options={}) {
+ const r=await fetch(url, {headers:{"Content-Type":"application/json"}, ...options});
+ if(!r.ok) throw new Error(await r.text());
+ return r.json();
+}
+async function loadComponents(){
+ componentCache=await api("/api/components");
+ for(const t of types) data[t]=componentCache.filter(x=>x.category===t).map(x=>[x.name,x.description,x.price,x.id]);
+}
+async function openComponents(type){
+ currentType=type;
+ document.getElementById("modalTitle").textContent="Выбор: "+type;
+ document.getElementById("modal").classList.add("show");
+ document.getElementById("modalSearch").value="";
+ if(!componentCache.length) await loadComponents();
+ renderModal();
+}
+function closeModal(){document.getElementById("modal").classList.remove("show")}
+function renderModal(){
+ let q=document.getElementById("modalSearch").value.toLowerCase();
+ document.getElementById("componentList").innerHTML=(data[currentType]||[]).filter(x=>x[0].toLowerCase().includes(q)).map(x=>`
+ <div class="component"><div><b>${x[0]}</b><div class="muted">${x[1]}</div></div><b>${money(x[2])}</b><button class="red" onclick='selectComponent(${JSON.stringify(x)})'>Выбрать</button></div>`).join("");
+}
+function selectComponent(x){
+ selected[currentType]={name:x[0],desc:x[1],price:x[2],id:x[3]};
+ closeModal(); renderParts(); toast("Компонент выбран");
+}
+function renderParts(){
+ document.getElementById("parts").innerHTML=types.map(t=>`<div class="part"><div class="part-name">${t}</div><div class="part-value">${selected[t]?selected[t].name:"Не выбран"}${selected[t]?` — ${money(selected[t].price)}`:""}</div><button class="red" onclick="openComponents('${t}')">${selected[t]?"Изменить":"＋ Добавить"}</button></div>`).join("");
+ document.getElementById("total").textContent=money(total());
+}
+function total(){return Object.values(selected).reduce((s,x)=>s+Number(x.price),0)}
+async function checkCompatibility(){
+ try{
+  const r=await api("/api/compatibility",{method:"POST",body:JSON.stringify({component_ids:Object.values(selected).map(x=>x.id)})});
+  document.getElementById("compat").textContent=r.compatible?"✓ Совместимо":"⚠ Есть замечания";
+  document.getElementById("compatibility").querySelector(".table").innerHTML=
+   "<tr><th>Проверка</th><th>Результат</th></tr>"+r.checks.map(c=>`<tr><td>${c.name}</td><td>${c.status==="ok"?"✓ Совместимо":"⚠ Нужно выбрать компоненты"}</td></tr>`).join("");
+  show("compatibility");
+ }catch(e){toast("Ошибка проверки")}
+}
+async function saveBuild(){
+ const ids=Object.values(selected).map(x=>x.id).filter(Boolean);
+ if(!ids.length){toast("Сначала выберите комплектующие");return}
+ try{
+  await api("/api/builds",{method:"POST",body:JSON.stringify({name:"Моя сборка PCFORGE",component_ids:ids})});
+  localStorage.setItem("pcforgeBuild",JSON.stringify(selected));
+  toast("Сборка сохранена в базе данных");
+ }catch(e){toast("Не удалось сохранить сборку")}
+}
+async function loadPreset(){
+ await loadComponents();
+ selected={};
+ for(const t of types){
+   const x=data[t][0];
+   selected[t]={name:x[0],desc:x[1],price:x[2],id:x[3]};
+ }
+ renderParts(); show("config");
+}
+async function renderOrder(){
+ document.getElementById("orderList").innerHTML="<h2>Выбранные компоненты</h2>"+types.filter(t=>selected[t]).map(t=>`<p>${t} — ${selected[t].name}<b style="float:right">${money(selected[t].price)}</b></p>`).join("");
+ document.getElementById("checkoutTotal").textContent=money(total());
+}
+async function pay(){
+ try{
+  const ids=Object.values(selected).map(x=>x.id).filter(Boolean);
+  const b=await api("/api/builds",{method:"POST",body:JSON.stringify({name:"Заказ PCFORGE",component_ids:ids})});
+  const o=await api("/api/orders",{method:"POST",body:JSON.stringify({build_id:b.id,total_price:total()})});
+  document.getElementById("successAmount").textContent=money(o.total_price);
+  document.getElementById("orderAmount").textContent=money(o.total_price);
+  show("success");
+ }catch(e){toast("Ошибка оформления заказа")}
+}
+function toast(t){let x=document.getElementById("toast");x.textContent=t;x.style.display="block";setTimeout(()=>x.style.display="none",1800)}
+async function renderCatalog(){
+ try{
+  const rows=await api("/api/components?q="+encodeURIComponent(document.getElementById("search").value||""));
+  document.getElementById("catalogGrid").innerHTML=rows.map(x=>`<div class="card"><h3>${x.name}</h3><p class="muted">${x.category} • ${x.description}</p><div class="price">${money(x.price)}</div><button class="red" onclick="openComponents('${x.category}')">Выбрать</button></div>`).join("");
+ }catch(e){}
+}
+function filterCatalog(){renderCatalog()}
+async function loadSaved(){
+ try{
+  await loadComponents();
+  const saved=localStorage.getItem("pcforgeBuild");
+  if(saved) selected=JSON.parse(saved);
+  renderParts();
+ }catch(e){toast("API недоступно")}
+}
+loadSaved();
+
+</script>
+</body>
+</html>
